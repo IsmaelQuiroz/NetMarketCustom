@@ -1,0 +1,36 @@
+[
+  {
+    "Nombre": "Bocinas",
+    "Porcentaje": 5
+  },
+  {
+    "Nombre": "Impresiones",
+    "Porcentaje": 8
+  },
+  {
+    "Nombre": "Audifonos Wireless",
+    "Porcentaje": 6
+  },
+  {
+    "Nombre": "Cargadores",
+    "Porcentaje": 6
+  },
+  {
+    "Nombre": "Iluminacion Solar",
+    "Porcentaje": 5
+  },
+  {
+    "Nombre": "Generales",
+    "Porcentaje": 4
+  },
+  {
+    "Nombre": "Papelería",
+    "Porcentaje": 4.5
+  },
+  {
+    "Nombre": "Novedades",
+    "Porcentaje": 4
+  }
+
+]
+
