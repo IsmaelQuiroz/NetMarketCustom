@@ -17,30 +17,39 @@ namespace WebApi.Controllers
     public class ProductoController : BaseApiController
     {
 
-        private readonly IProductoRepository _productoRepository;
+        //private readonly IProductoRepository _productoRepository;
+
+        // la <T> se transforma en Producto en este contexto
+        private readonly IGenericRepository<Producto> _productoRepository;
         private readonly IMapper _mapper;
 
-        public ProductoController(IProductoRepository productoRepository, IMapper mapper)
+        //public ProductoController(IProductoRepository productoRepository, IMapper mapper)
+        public ProductoController(IGenericRepository<Producto> productoRepository, IMapper mapper)
         {
             _productoRepository = productoRepository;
             _mapper = mapper;
         }
 
+        //http://localhost:5000/api/Producto
         [HttpGet]
         public async Task<ActionResult<List<Producto>>> GetProductos()
         {
-            var productos = await _productoRepository.GetProductosAsync();
+            //var productos = await _productoRepository.GetProductosAsync();
+            var productos = await _productoRepository.GetAllAsync();
+
             //return Ok(productos); // el Ok es un wrapper porque se trata de una lista ReadOnly
             return Ok(_mapper.Map<IReadOnlyList<Producto>, IReadOnlyList<ProductoDto>>(productos)); // el Ok es un wrapper porque se trata de una lista ReadOnly
         }
 
+        //http://localhost:5000/api/Producto/1
         [HttpGet("{id}")]
         public async Task<ActionResult<ProductoDto>> GetProducto(int id)
         {
             //return  await _productoRepository.GetProductoByIdAsync(id);
-            var producto = await _productoRepository.GetProductoByIdAsync(id);
+            //var producto = await _productoRepository.GetProductoByIdAsync(id);
+            var producto = await _productoRepository.GetByIdAsync(id);
 
-            if(producto ==null)
+            if (producto ==null)
             {
                 //return NotFound(new CodeErrorResponse(404));
                 return NotFound(new CodeErrorResponse(404, "El Producto no existe"));
