@@ -42,8 +42,17 @@ public class Startup
         //    app.UseDeveloperExceptionPage();
         //}
 
+
         //agrego el Middleware que acabo de crear
         app.UseMiddleware<ExceptionMiddleware>();
+
+        app.UseCors(options =>
+        {
+            options
+            .AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+        });
 
 
         app.UseStatusCodePagesWithReExecute("/errors", "?code={0}");
