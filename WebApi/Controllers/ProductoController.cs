@@ -33,9 +33,9 @@ namespace WebApi.Controllers
 
         //http://localhost:5000/api/Producto
         [HttpGet]
-        public async Task<ActionResult<List<Producto>>> GetProductos()
+        public async Task<ActionResult<List<Producto>>> GetProductos(string sort)
         {
-            var spec =  new ProductoWithCategoriaAndMarcaSpecification();
+            var spec =  new ProductoWithCategoriaAndMarcaSpecification(sort);
             //var productos = await _productoRepository.GetProductosAsync();
             //var productos = await _productoRepository.GetAllAsync();
             var productos = await _productoRepository.GetAllWithSpec(spec);
