@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
+using Core.Specifications;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
@@ -34,8 +35,10 @@ namespace WebApi.Controllers
         [HttpGet]
         public async Task<ActionResult<List<Producto>>> GetProductos()
         {
+            var spec =  new ProductoWithCategoriaAndMarcaSpecification();
             //var productos = await _productoRepository.GetProductosAsync();
-            var productos = await _productoRepository.GetAllAsync();
+            //var productos = await _productoRepository.GetAllAsync();
+            var productos = await _productoRepository.GetAllWithSpec(spec);
 
             //return Ok(productos); // el Ok es un wrapper porque se trata de una lista ReadOnly
             return Ok(_mapper.Map<IReadOnlyList<Producto>, IReadOnlyList<ProductoDto>>(productos)); // el Ok es un wrapper porque se trata de una lista ReadOnly
@@ -46,8 +49,14 @@ namespace WebApi.Controllers
         public async Task<ActionResult<ProductoDto>> GetProducto(int id)
         {
             //return  await _productoRepository.GetProductoByIdAsync(id);
-            //var producto = await _productoRepository.GetProductoByIdAsync(id);
-            var producto = await _productoRepository.GetByIdAsync(id);
+            //var producto = await _productoRepository.GetProductoByIdAsync(id);           
+            //var producto = await _productoRepository.GetByIdAsync(id);
+
+            //spec = debe incluir la logica de la condicion de la consulta y las relaciones entre
+            //las entidades, la relación entre Producto, Marca y Categoría.
+
+            var spec = new ProductoWithCategoriaAndMarcaSpecification(id);
+            var producto = await _productoRepository.GetByIdWithSpec(spec);
 
             if (producto ==null)
             {
