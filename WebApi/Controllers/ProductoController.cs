@@ -31,11 +31,12 @@ namespace WebApi.Controllers
             _mapper = mapper;
         }
 
+        //http://localhost:5000/api/Producto?sort=descripcionAsc&marca=10
         //http://localhost:5000/api/Producto
         [HttpGet]
-        public async Task<ActionResult<List<Producto>>> GetProductos(string sort)
+        public async Task<ActionResult<List<Producto>>> GetProductos(string sort, int? marca, int? categoria)
         {
-            var spec =  new ProductoWithCategoriaAndMarcaSpecification(sort);
+            var spec =  new ProductoWithCategoriaAndMarcaSpecification(sort, marca, categoria);
             //var productos = await _productoRepository.GetProductosAsync();
             //var productos = await _productoRepository.GetAllAsync();
             var productos = await _productoRepository.GetAllWithSpec(spec);
