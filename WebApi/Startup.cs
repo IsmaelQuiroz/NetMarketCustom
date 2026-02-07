@@ -8,6 +8,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using System.Net.Sockets;
+using System.Reflection.PortableExecutable;
+using System.Security.Policy;
 using WebApi.Dtos;
 using WebApi.Middleware;
 
@@ -24,11 +26,15 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        services.AddScoped(typeof(IGenericRepository<>), (typeof(GenericRepository<>)));
+
         services.AddAutoMapper(typeof(MappingProfiles));
+        
         //services.AddDbContext<MarketDbContext>();
         services.AddDbContext<MarketDbContext>(opt => {
             opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
         });
+
         services.AddTransient<IClienteRepository, ClienteRepository>();
         services.AddTransient<IVentaRepository, VentaRepository>();
         services.AddTransient<IProductoRepository, ProductoRepository>();
@@ -46,6 +52,10 @@ public class Startup
         //agrego el Middleware que acabo de crear
         app.UseMiddleware<ExceptionMiddleware>();
 
+        //cuando sale un error como este en React--browser
+        //Access to XMLHttpRequest at 'http://localhost:5000/api/producto'
+        //from origin 'http://localhost:3000' has been blocked by CORS policy:
+        //No 'Access-Control-Allow-Origin' header is present on the requested resource.
         app.UseCors(options =>
         {
             options
