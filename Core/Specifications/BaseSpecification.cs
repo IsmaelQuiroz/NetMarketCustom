@@ -39,5 +39,19 @@ namespace Core.Specifications
         {
             OrderByDescending = orderByDescExpression;
         }
+
+        public int Take { get; private set; }
+
+        public int Skip { get; private set; }
+
+        public bool IsPagingEnabled { get; private set; }
+
+        //porque puede ser accedido este metodo desde una clase derivada de BaseSpecification
+        protected void ApplyPaging( int skip, int take)
+        {
+            Skip = skip;
+            Take = take;
+            IsPagingEnabled = true;
+        }
     }
 }

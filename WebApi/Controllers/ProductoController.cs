@@ -3,9 +3,12 @@ using Core.Entities;
 using Core.Interfaces;
 using Core.Specifications;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WebApi.Dtos;
 using WebApi.Errors;
@@ -31,18 +34,42 @@ namespace WebApi.Controllers
             _mapper = mapper;
         }
 
-        //http://localhost:5000/api/Producto?sort=descripcionAsc&marca=10
         //http://localhost:5000/api/Producto
-        [HttpGet]
-        public async Task<ActionResult<List<Producto>>> GetProductos(string sort, int? marca, int? categoria)
+        //http://localhost:5000/api/Producto?sort=descripcionAsc&marca=10
+        //http://localhost:5000/api/Producto?pageIndex=1&pageSize=2
+
+        [HttpGet] 
+        //public async Task<ActionResult<List<Producto>>> GetProductos(string sort, int? marca, int? categoria, int pageIndex)
+        //public async Task<ActionResult<List<Producto>>> GetProductos([FromQuery]ProductoSpecificationParams productoParams)
+        public async Task<ActionResult<Pagination<ProductoDto>>> GetProductos([FromQuery] ProductoSpecificationParams productoParams)
         {
-            var spec =  new ProductoWithCategoriaAndMarcaSpecification(sort, marca, categoria);
+            //var spec =  new ProductoWithCategoriaAndMarcaSpecification(sort, marca, categoria);
+            var spec = new ProductoWithCategoriaAndMarcaSpecification(productoParams);
             //var productos = await _productoRepository.GetProductosAsync();
             //var productos = await _productoRepository.GetAllAsync();
             var productos = await _productoRepository.GetAllWithSpec(spec);
 
+            var specCount = new ProductoForCountingSpecification(productoParams);
+            var totalProductos = await _productoRepository.CountAsync(specCount);
+
+            var rounded = Math.Ceiling(Convert.ToDecimal(totalProductos / productoParams.PageSize));
+            var totalPages = Convert.ToInt32(rounded);
+
+            var data = _mapper.Map<IReadOnlyList<Producto>, IReadOnlyList<ProductoDto>>(productos);
+
+            return Ok(
+                new Pagination<ProductoDto>
+                {
+                    Count = totalProductos,
+                    Data = data,
+                    PageCount = totalPages,
+                    PageIndex = productoParams.PageIndex,
+                    PageSize = productoParams.PageSize
+                }
+            );
+
             //return Ok(productos); // el Ok es un wrapper porque se trata de una lista ReadOnly
-            return Ok(_mapper.Map<IReadOnlyList<Producto>, IReadOnlyList<ProductoDto>>(productos)); // el Ok es un wrapper porque se trata de una lista ReadOnly
+            //return Ok(_mapper.Map<IReadOnlyList<Producto>, IReadOnlyList<ProductoDto>>(productos)); // el Ok es un wrapper porque se trata de una lista ReadOnly
         }
 
         //http://localhost:5000/api/Producto/1
