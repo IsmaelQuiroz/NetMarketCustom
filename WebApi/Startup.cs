@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Net.Security;
 using System.Net.Sockets;
 using System.Reflection.PortableExecutable;
 using System.Security.Policy;
@@ -39,6 +40,15 @@ public class Startup
         services.AddTransient<IVentaRepository, VentaRepository>();
         services.AddTransient<IProductoRepository, ProductoRepository>();
         services.AddControllers();
+
+        //Adicionado
+        services.AddCors(opt =>
+        {
+            opt.AddPolicy("CorsRule", rule =>
+            {
+                rule.AllowAnyHeader().AllowAnyMethod().WithOrigins("*");
+            });
+        });
     }
 
     public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
@@ -56,18 +66,23 @@ public class Startup
         //Access to XMLHttpRequest at 'http://localhost:5000/api/producto'
         //from origin 'http://localhost:3000' has been blocked by CORS policy:
         //No 'Access-Control-Allow-Origin' header is present on the requested resource.
-        app.UseCors(options =>
-        {
-            options
-            .AllowAnyOrigin()
-            .AllowAnyHeader()
-            .AllowAnyMethod();
-        });
+        //SI FUNCIONA
+        //app.UseCors(options =>
+        //{
+        //    options
+        //    .AllowAnyOrigin()
+        //    .AllowAnyHeader()
+        //    .AllowAnyMethod();
+        //});
 
 
         app.UseStatusCodePagesWithReExecute("/errors", "?code={0}");
 
         app.UseRouting();
+
+        //Cors agregado by turorial
+        app.UseCors("CorsRule");
+
         app.UseAuthentication();
         app.UseAuthorization();
         app.UseEndpoints(endpoints =>
