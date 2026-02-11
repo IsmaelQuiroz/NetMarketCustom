@@ -11,8 +11,10 @@ namespace Core.Specifications
     {
         //public ProductoWithCategoriaAndMarcaSpecification(string sort, int? marca, int? categoria)
         public ProductoWithCategoriaAndMarcaSpecification(ProductoSpecificationParams productoParams)
-            : base( x => (!productoParams.Marca.HasValue || x.MarcaId == productoParams.Marca) &&
-                        (!productoParams.Categoria.HasValue || x.CategoriaId == productoParams.Categoria) 
+            : base( x => 
+            (string.IsNullOrEmpty(productoParams.Search) || x.Nombre.Contains(productoParams.Search)) &&
+            (!productoParams.Marca.HasValue || x.MarcaId == productoParams.Marca) &&
+            (!productoParams.Categoria.HasValue || x.CategoriaId == productoParams.Categoria) 
             )
         {
             //Aqui vamos a agregar los Include relaciones que va tener esta entidad Producto
