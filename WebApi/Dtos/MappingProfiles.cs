@@ -3,7 +3,7 @@ using Core.Entities;
 
 namespace WebApi.Dtos
 {
-    public class MappingProfiles : Profile
+    public class MappingProfiles : Profile //esta clase Profile proviene desde la libreria instalada Automaper
     {
         public MappingProfiles() {
             //Mapeo Automatico
