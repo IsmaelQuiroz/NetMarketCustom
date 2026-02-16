@@ -1,8 +1,10 @@
 ﻿using BusinessLogic.Data;
 using BusinessLogic.Logic;
+using Core.Entities;
 using Core.Interfaces;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,24 +19,46 @@ using WebApi.Middleware;
 namespace WebApi;
 
 public class Startup
-{
-    public IConfiguration Configuration { get;  }
-
+{   
     public Startup (IConfiguration configuration)
     {
         Configuration = configuration;
     }
 
+    public IConfiguration Configuration { get; }
+
     public void ConfigureServices(IServiceCollection services)
     {
-        services.AddScoped(typeof(IGenericRepository<>), (typeof(GenericRepository<>)));
+        /*Seguridad: 8 Inyectar el Servicio de IdentityCore al interior de nuestro proyecto WebApi,
+        para que se ejecute el proceso de Migration o CodeFirst ya para la creación de las tablas en SQL
+        este objeto es la instancia del EntityCore , la representación del modelo */
+        var builder = services.AddIdentityCore<Usuario>();
+        //Agregarle los servicios para el userType
+        builder = new IdentityBuilder(builder.UserType, builder.Services); //esto es lo que necesita el objeto para poder construir las tablas desde el modelo del IdentityCore
+        builder.AddEntityFrameworkStores<SeguridadDbContext>();
+        builder.AddSignInManager<SignInManager<Usuario>>(); //
+
+        //Seguridad: 9 Indicarle que magregue el manejo de la autenticación
+        services.AddAuthentication();
 
         services.AddAutoMapper(typeof(MappingProfiles));
+
+        services.AddScoped(typeof(IGenericRepository<>), (typeof(GenericRepository<>)));
         
         //services.AddDbContext<MarketDbContext>();
         services.AddDbContext<MarketDbContext>(opt => {
             opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
         });
+
+        //Seguridad:3
+        services.AddDbContext<SeguridadDbContext>(x =>
+        {
+            x.UseSqlServer(Configuration.GetConnectionString("IdentitySeguridad"));
+        });
+
+        //Seguridad:4, en el appsettings.json definir la cadena de conexión  "IdentitySeguridad"
+        //Seguridad:5, ir SSMS de SQL Server y crear manualmente la Base de Datos IdentitySeguridad, 
+        //Seguridad:6 Ejecutar el comando dotnet... para agregar los archivos de Migración de SeguridadDbContext
 
         services.AddTransient<IClienteRepository, ClienteRepository>();
         services.AddTransient<IVentaRepository, VentaRepository>();
