@@ -20,6 +20,7 @@ namespace BusinessLogic.Data
                     Nombre = "Maria",
                     Apellido = "Del Carmen",
                     UserName = "mdc",
+                    Email = "mdc25@gmail.com",
                     Direccion = new Direccion
                     {
                         Calle = "Los Proceres 321",
