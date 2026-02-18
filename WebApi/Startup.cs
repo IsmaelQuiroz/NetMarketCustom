@@ -2,6 +2,7 @@
 using BusinessLogic.Logic;
 using Core.Entities;
 using Core.Interfaces;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
@@ -9,10 +10,12 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.IdentityModel.Tokens;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Reflection.PortableExecutable;
 using System.Security.Policy;
+using System.Text;
 using WebApi.Dtos;
 using WebApi.Middleware;
 
@@ -29,6 +32,9 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        //Token #
+        services.AddScoped<ITokenService, TokenService>();
+
         /*Seguridad: 8 Inyectar el Servicio de IdentityCore al interior de nuestro proyecto WebApi,
         para que se ejecute el proceso de Migration o CodeFirst ya para la creación de las tablas en SQL
         este objeto es la instancia del EntityCore , la representación del modelo */
@@ -39,7 +45,20 @@ public class Startup
         builder.AddSignInManager<SignInManager<Usuario>>(); //
 
         //Seguridad: 9 Indicarle que magregue el manejo de la autenticación
-        services.AddAuthentication();
+        //Token #: Se configura la seguridad de la Aplicacion en base al Token
+        services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+        {
+            options.TokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration["Token:Key"])),
+                ValidIssuer = Configuration["Token:Issuer"], //Valor del servidor que esta generando el token
+                ValidateIssuer = true,
+                ValidateAudience = false
+            };
+        });
+
+        //Token #: Se agregan los Token:Key y Token:Issuer al appsettings.json
 
         services.AddAutoMapper(typeof(MappingProfiles));
 
