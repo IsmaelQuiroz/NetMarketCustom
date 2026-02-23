@@ -1,11 +1,16 @@
-﻿using Core.Entities;
+﻿using AutoMapper;
+using Core.Entities;
 using Core.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using WebApi.Dtos;
 using WebApi.Errors;
+using WebApi.Extensions;
 
 namespace WebApi.Controllers
 {
@@ -18,11 +23,14 @@ namespace WebApi.Controllers
         //Token #
         private readonly ITokenService _tokenService;
 
-        public UsuarioController(UserManager<Usuario> userManager, SignInManager<Usuario> signInManager, ITokenService tokenService)    
+        private readonly IMapper _mapper;
+
+        public UsuarioController(UserManager<Usuario> userManager, SignInManager<Usuario> signInManager, ITokenService tokenService, IMapper mapper)    
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;  //Token #
+            _mapper = mapper;
         }
 
         [HttpPost("login")]
@@ -80,5 +88,66 @@ namespace WebApi.Controllers
                 Username = usuario.UserName
             };
         }
+
+
+        //No se le ponen parámetros porque el Token se envía dentro del Header del Request
+        [Authorize]
+        [HttpGet]
+        public async Task<ActionResult<UsuarioDto>> GetUsuario()
+        {
+            //estas lineas ya quedaron incluidas en le metodo estatico del USerManagerExtensions.cs
+            //var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+            //var usuario = await _userManager.FindByEmailAsync(email);
+
+            var usuario = await _userManager.BuscarUsuarioAsync(HttpContext.User);
+
+            return new UsuarioDto
+            {
+                Nombre = usuario.Nombre,
+                Apellido = usuario.Apellido,
+                Email = usuario.Email,
+                Username = usuario.UserName,
+                Token = _tokenService.CreateToken(usuario)
+
+            };
+        }
+
+        [HttpGet("emailvalido")]
+        public async Task<ActionResult<bool>> ValidarEmail([FromQuery]string email)
+        {
+            var usuario = await _userManager.FindByEmailAsync(email);
+
+            if (usuario == null) return false;
+
+            return true;
+
+        }
+
+        [Authorize]
+        [HttpGet("direccion")]
+        public async Task<ActionResult<DireccionDto>> GetDireccion()
+        {
+            //estas lineas ya quedaron incluidas en le metodo estatico del USerManagerExtensions.cs
+            //var email = HttpContext.User?.Claims?.FirstOrDefault(x => x.Type == ClaimTypes.Email)?.Value;
+            //var usuario = await _userManager.FindByEmailAsync(email);
+
+            var usuario = await _userManager.BuscarUsuarioConDireccionAsync(HttpContext.User);
+
+            return _mapper.Map<Direccion, DireccionDto>(usuario.Direccion);
+        }
+
+        [Authorize]
+        [HttpPut("direccion")]
+        public async Task<ActionResult<DireccionDto>> UpdateDireccion(DireccionDto direccion)
+        {
+            var usuario = await _userManager.BuscarUsuarioConDireccionAsync(HttpContext.User);
+            usuario.Direccion = _mapper.Map<DireccionDto, Direccion>(direccion);
+            var resultado = await _userManager.UpdateAsync(usuario);
+            if (resultado.Succeeded) return Ok(_mapper.Map<Direccion, DireccionDto>(usuario.Direccion));
+            return BadRequest("No se pudo actualizar la dirección del usuario");
+
+
+        }
+
     }
 }
