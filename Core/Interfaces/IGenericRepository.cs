@@ -31,6 +31,11 @@ namespace Core.Interfaces
 
         //Para la cnatidad de elementos a devolver de la Entidad
         Task<int> CountAsync(ISpecification<T> spec);
+
+        //1 Aditional two Generic Methods
+        Task<int> Add(T entity);
+
+        Task<int> Update (T entity);
     }
 
 
