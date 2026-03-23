@@ -95,5 +95,29 @@ namespace WebApi.Controllers
             return  _mapper.Map<Producto, ProductoDto>(producto);
         }
 
+        //3 Consumo de los 2 nuevos metodos Genericos agregados
+        [HttpPost]
+        public async Task<ActionResult<Producto>> Post(Producto producto)
+        {
+            var resultado = await _productoRepository.Add(producto);
+            if(resultado == 0)
+            {
+                throw new Exception("No se insertó el producto");
+            }
+            return Ok(producto);
+        }
+
+        [HttpPut("{id}")]
+        public async Task<ActionResult<Producto>> Put(int id, Producto producto)
+        {
+            producto.Id = id;
+            var resultado = await _productoRepository.Update(producto);
+            if(resultado == 0)
+            {
+                throw new Exception("No se pudo actualizar el producto");
+            }
+            return Ok(producto);
+        }
+
     }
 }
