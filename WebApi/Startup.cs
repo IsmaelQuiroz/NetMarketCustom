@@ -11,6 +11,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
 using System.Net.Security;
 using System.Net.Sockets;
 using System.Reflection.PortableExecutable;
@@ -79,10 +80,26 @@ public class Startup
         //Seguridad:5, ir SSMS de SQL Server y crear manualmente la Base de Datos IdentitySeguridad, 
         //Seguridad:6 Ejecutar el comando dotnet... para agregar los archivos de Migración de SeguridadDbContext
 
+        //Redis1:Singleton significa que el programa va crear una sola instancia de objeto conexión para el Redis
+        //que va ser utilizado durante todo el ciclo de vida del programa
+        services.AddSingleton<IConnectionMultiplexer>( c =>
+        {
+            var configuration = ConfigurationOptions.Parse(Configuration.GetConnectionString("Redis"), true);
+            return ConnectionMultiplexer.Connect(configuration);
+
+        });
+
+        //Redis2: Agregar la propiedad redis al interior del appsettings.json
+
         services.AddTransient<IClienteRepository, ClienteRepository>();
         services.AddTransient<IVentaRepository, VentaRepository>();
         services.AddTransient<IProductoRepository, ProductoRepository>();
         services.AddControllers();
+
+        //Redis5: servicios para Carritocompras para que cuando se arranque el proyecto se inicialicen las operaciones
+        //de la interface con su implementación
+        //se hace la inyección y esto posibilita utilizar le interface en cualquier clase del proyecto
+        services.AddScoped<ICarritoCompraRepository, CarritoCompraRepository>();
 
         //Adicionado
         services.AddCors(opt =>

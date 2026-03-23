@@ -1,0 +1,50 @@
+﻿using Core.Entities;
+using Core.Interfaces;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using System.Linq.Expressions;
+using System.Threading.Tasks;
+
+namespace WebApi.Controllers
+{
+
+    public class CarritoCompraController : BaseApiController
+    {
+        private readonly ICarritoCompraRepository _carritoCompra;
+
+        public CarritoCompraController(ICarritoCompraRepository carritoCompra)
+        {
+            _carritoCompra = carritoCompra;
+        }
+
+        [HttpGet]
+        public async Task<ActionResult<CarritoCompra>> GetCarritoById(string id)
+        {
+            var carrito = await _carritoCompra.GetCarritoCompraAsync(id);
+
+            return Ok(carrito ?? new CarritoCompra(id));
+        }
+
+
+        //Parametros
+        //{
+        //    "id": "iqscarritocompra",
+        //    "items": [
+        //        {"id":1, "producto":"Camisa verano", "precio": 10.5,"cantidad":1, "imagen":"", "marca": "nike", "categoria": "camisa"}
+        //    ]
+        //}
+
+        [HttpPost]
+        public async Task<ActionResult<CarritoCompra>> UpdateCarritoCompra(CarritoCompra carritoParametro)
+        {
+            var carritoActualizado = await _carritoCompra.UpdateCarritoCompraAsync(carritoParametro);
+            return Ok(carritoActualizado);
+        }
+
+        [HttpDelete]
+        public async Task DeleteCarritoCompra(string id)
+        {
+           await _carritoCompra.DeleteCarritoCompraAsync(id);
+        }
+    }
+}
