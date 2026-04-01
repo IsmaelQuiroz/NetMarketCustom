@@ -19,10 +19,12 @@ namespace Core.Entities
         public int CategoriaId { get; set; }
         public CategoriaProducto categoria {  get; set; }
         public int MarcaId { get; set; }
-        public Marca marca { get; set; }    
+        public Marca marca { get; set; }
+        public string Imagen { get; set; }
         public string Atributo { get; set; }
         public string OwnerT { get; set; }
         public string Ubicacion { get; set; }  
+        
 
     }
 }

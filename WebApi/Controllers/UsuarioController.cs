@@ -24,13 +24,16 @@ namespace WebApi.Controllers
         private readonly ITokenService _tokenService;
 
         private readonly IMapper _mapper;
+        private readonly IPasswordHasher<Usuario> _passwordHasher;
 
-        public UsuarioController(UserManager<Usuario> userManager, SignInManager<Usuario> signInManager, ITokenService tokenService, IMapper mapper)    
+        public UsuarioController(UserManager<Usuario> userManager, SignInManager<Usuario> signInManager,
+            ITokenService tokenService, IMapper mapper, IPasswordHasher<Usuario> passwordHasher)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;  //Token #
             _mapper = mapper;
+            _passwordHasher = passwordHasher;
         }
 
         [HttpPost("login")]
@@ -38,11 +41,11 @@ namespace WebApi.Controllers
         {
             var usuario = await _userManager.FindByEmailAsync(loginDto.Email);
 
-            if(User == null)
+            if (User == null)
             {
                 return Unauthorized(new CodeErrorResponse(401));
             }
-            
+
             var resultado = await _signInManager.CheckPasswordSignInAsync(usuario, loginDto.Password, false);
 
             if (!resultado.Succeeded)
@@ -60,7 +63,7 @@ namespace WebApi.Controllers
             };
         }
 
-        
+
         [HttpPost("registrar")]
         public async Task<ActionResult<UsuarioDto>> Registrar(RegistrarDto registroDto)
         {
@@ -89,6 +92,39 @@ namespace WebApi.Controllers
             };
         }
 
+        [Authorize]
+        [HttpPut("actualizar/{id}")]
+        public async Task<ActionResult<UsuarioDto>> Actualizar(string id, RegistrarDto resgistrarDto)
+        {
+            var usuario = await _userManager.FindByIdAsync(id);
+            if (usuario == null)
+            {
+                return NotFound(new CodeErrorResponse(404, "El usuario no existe"));
+            }
+
+            usuario.Nombre = resgistrarDto.Nombre;
+            usuario.Apellido = resgistrarDto.Apellido;
+            usuario.PasswordHash = _passwordHasher.HashPassword(usuario, resgistrarDto.Password);
+
+            var resultado = await _userManager.UpdateAsync(usuario);
+
+            if (!resultado.Succeeded)
+            {
+                return BadRequest(new CodeErrorResponse(400, "No se pudo actualizar el usuario"));
+            }
+
+            return new UsuarioDto
+            {
+                Nombre = usuario.Nombre,
+                Apellido = usuario.Apellido,
+                Email = usuario.Email,
+                Username = usuario.UserName,
+                Token = _tokenService.CreateToken(usuario),
+                Imagen = usuario.Imagen
+            };
+
+        }
+
 
         //No se le ponen parámetros porque el Token se envía dentro del Header del Request
         [Authorize]
@@ -113,7 +149,7 @@ namespace WebApi.Controllers
         }
 
         [HttpGet("emailvalido")]
-        public async Task<ActionResult<bool>> ValidarEmail([FromQuery]string email)
+        public async Task<ActionResult<bool>> ValidarEmail([FromQuery] string email)
         {
             var usuario = await _userManager.FindByEmailAsync(email);
 
