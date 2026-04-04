@@ -17,6 +17,7 @@ namespace WebApi.Dtos
         public string CategoriaNombre { get; set; }
         public int MarcaId { get; set; }
         public string MarcaNombre { get; set; }
+        public string Imagen { get; set; }
         public string Atributo { get; set; }
         public string OwnerT { get; set; }
         public string Ubicacion { get; set; }

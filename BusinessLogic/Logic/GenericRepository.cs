@@ -59,5 +59,19 @@ namespace BusinessLogic.Logic
         {
             return await ApplySpecification(spec).CountAsync();
         }
+
+        //2 Implementation of two new Generic methods
+        public async Task<int> Add(T entity)
+        {
+           _context.Set<T>().Add(entity);
+            return await _context.SaveChangesAsync();
+        }
+
+        public async Task<int> Update(T entity)
+        {
+            _context.Set<T>().Attach(entity); //Actualizar sobre la entidad entity
+            _context.Entry(entity).State = EntityState.Modified; //Se indica que actualice los valores y no los duplique dentro de la BD
+            return await _context.SaveChangesAsync(); //Confirmar los cambios
+        }
     }
 }

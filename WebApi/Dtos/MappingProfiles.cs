@@ -13,6 +13,8 @@ namespace WebApi.Dtos
             CreateMap<Producto, ProductoDto>()
                 .ForMember(p => p.CategoriaNombre, x => x.MapFrom(a => a.categoria.Nombre))
                 .ForMember(p => p.MarcaNombre, x => x.MapFrom(a => a.marca.Nombre));
+
+            CreateMap<Direccion, DireccionDto>().ReverseMap();
         }
     }
 }
