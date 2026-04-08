@@ -1,10 +1,13 @@
 ﻿using AutoMapper;
 using Core.Entities;
 using Core.Interfaces;
+using Core.Specifications;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.VisualBasic;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -25,15 +28,17 @@ namespace WebApi.Controllers
 
         private readonly IMapper _mapper;
         private readonly IPasswordHasher<Usuario> _passwordHasher;
+        private readonly IGenericSeguridadRepository<Usuario> _seguridadRepository; //Generic Repository Pattern 3
 
         public UsuarioController(UserManager<Usuario> userManager, SignInManager<Usuario> signInManager,
-            ITokenService tokenService, IMapper mapper, IPasswordHasher<Usuario> passwordHasher)
+            ITokenService tokenService, IMapper mapper, IPasswordHasher<Usuario> passwordHasher, IGenericSeguridadRepository<Usuario> seguridadRepository)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _tokenService = tokenService;  //Token #
             _mapper = mapper;
             _passwordHasher = passwordHasher;
+            _seguridadRepository = seguridadRepository; //Generic Repository Pattern 4
         }
 
         [HttpPost("login")]
@@ -183,6 +188,41 @@ namespace WebApi.Controllers
             return BadRequest("No se pudo actualizar la dirección del usuario");
 
 
+        }
+
+
+        [HttpGet("pagination")] //es el texto que se agrega al final del endpoint del metodo
+        public async Task<ActionResult<Pagination<UsuarioDto>>> GetUsuarios([FromQuery] UsuarioSpecificationParams usuarioParams)//devuelve un objeto tipo Pagination con data de tipo UsuarioDto,
+        {//[FromQuery] porque los parámetros viajan dentro de la URL y estos datos son de tipo UsuarioSpecificationParams
+            
+            //las especificaciones ocupan los parámetros para crear la logica
+            var spec = new UsuarioSpecification(usuarioParams);
+            //Todos los filtros y la logica para los usuarios se basan en especificaciones,
+            var usuarios = await _seguridadRepository.GetAllWithSpec(spec);//se pasa la spec para obtener la lista de usuarios
+
+            //y luego se le pasa ese objeto especificación al repositorio que devulve la data de usuarios o del total de usuarios
+            var specCount = new UsuarioForCountingSpecification(usuarioParams);
+            var totalUsuarios = await _seguridadRepository.CountAsync(specCount); //se pasa el spec para obtener el Total de usuarios
+
+            //para que redondee con el valor máximo de usuarios
+            //ejemplo 1.3 a 2, y 5.3 a 6
+            var rounded = Math.Ceiling(Convert.ToDecimal(totalUsuarios) / Convert.ToDecimal(usuarioParams.PageSize));
+            var totalPages = Convert.ToInt32(rounded);
+
+            //mapeo de una lista IReadOnlyList<Usuario> contra otra lista de UsuarioDto
+            var data = _mapper.Map<IReadOnlyList<Usuario>, IReadOnlyList<UsuarioDto>>(usuarios); //este mapping debe registrarse dentro del MappingProfiles WebApi.Dtos
+
+            //devuelve el objeto Pagination al cliente
+            return Ok(
+                new Pagination<UsuarioDto>
+                {
+                    Count = totalUsuarios,
+                    Data = data,
+                    PageCount = totalPages,
+                    PageIndex = usuarioParams.PageIndex,
+                    PageSize = usuarioParams.PageSize
+                }
+            );
         }
 
     }
