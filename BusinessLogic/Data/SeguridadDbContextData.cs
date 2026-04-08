@@ -11,7 +11,7 @@ namespace BusinessLogic.Data
     //Seguridad: 7 Agregar la data inicial, es decir la creación del usuario inicial
     public class SeguridadDbContextData
     {
-        public static async Task SeedUserAsync(UserManager<Usuario> userManager)
+        public static async Task SeedUserAsync(UserManager<Usuario> userManager, RoleManager<IdentityRole> roleManager) //Roles 1
         {
             if (!userManager.Users.Any())
             {
@@ -31,6 +31,18 @@ namespace BusinessLogic.Data
                 };
 
                 await userManager.CreateAsync(usuario, "Mary2026$");
+            }
+
+            //Roles 1.1
+            //roleManager administra la tabla de roles de la base de datos
+            if (!roleManager.Roles.Any())
+            {
+                var role = new IdentityRole
+                {
+                    Name = "ADMIN"
+                };
+
+                await roleManager.CreateAsync(role);
             }
         }
     }

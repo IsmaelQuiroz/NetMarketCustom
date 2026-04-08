@@ -45,11 +45,12 @@ public class Program
                 //Seguridad 10: Aplicar la Migración relacionada a Seguridad
                 var identityContext = services.GetRequiredService<SeguridadDbContext>(); //representa la instancia del Dbcontext para esta parte de Seguridad
                 await identityContext.Database.MigrateAsync(); //aqui se ejecuta el proceso de Migración
+              
+                var userManager = services.GetRequiredService<UserManager<Usuario>>();  //Una vez que la migración concluya, crear el nuevo usuario 
 
-                //Una vez que la migración concluya, crear el nuevo usuario 
-                var userManager = services.GetRequiredService<UserManager<Usuario>>();
-                await SeguridadDbContextData.SeedUserAsync(userManager);
+                var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>(); //Roles 4
 
+                await SeguridadDbContextData.SeedUserAsync(userManager, roleManager);
 
             }
             catch (Exception e)

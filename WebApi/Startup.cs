@@ -2,6 +2,7 @@
 using BusinessLogic.Logic;
 using Core.Entities;
 using Core.Interfaces;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -9,6 +10,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
@@ -42,6 +44,9 @@ public class Startup
         var builder = services.AddIdentityCore<Usuario>();
         //Agregarle los servicios para el userType
         builder = new IdentityBuilder(builder.UserType, builder.Services); //esto es lo que necesita el objeto para poder construir las tablas desde el modelo del IdentityCore
+
+        builder.AddRoles<IdentityRole>(); //Roles 2
+
         builder.AddEntityFrameworkStores<SeguridadDbContext>();
         builder.AddSignInManager<SignInManager<Usuario>>(); //
 
@@ -89,8 +94,9 @@ public class Startup
             return ConnectionMultiplexer.Connect(configuration);
 
         });
-
         //Redis2: Agregar la propiedad redis al interior del appsettings.json
+
+        services.TryAddSingleton<ISystemClock, SystemClock>(); //Agrega la hora precisa en la que se esta insertando un nuevo record en estas tablas de seguridad
 
         services.AddTransient<IClienteRepository, ClienteRepository>();
         services.AddTransient<IVentaRepository, VentaRepository>();
@@ -151,5 +157,6 @@ public class Startup
             endpoints.MapControllers();
         });
     }
+
 }
 
