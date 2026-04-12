@@ -2,6 +2,7 @@
 using Core.Entities;
 using Core.Interfaces;
 using Core.Specifications;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -96,6 +97,7 @@ namespace WebApi.Controllers
         }
 
         //3 Consumo de los 2 nuevos metodos Genericos agregados
+        [Authorize(Roles = "ADMIN")]
         [HttpPost]
         public async Task<ActionResult<Producto>> Post(Producto producto)
         {
@@ -107,6 +109,7 @@ namespace WebApi.Controllers
             return Ok(producto);
         }
 
+        [Authorize(Roles ="ADMIN")]
         [HttpPut("{id}")]
         public async Task<ActionResult<Producto>> Put(int id, Producto producto)
         {
