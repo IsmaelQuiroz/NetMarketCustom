@@ -170,8 +170,18 @@ namespace WebApi.Controllers
             var rounded = Math.Ceiling(Convert.ToDecimal(totalUsuarios) / Convert.ToDecimal(usuarioParams.PageSize));
             var totalPages = Convert.ToInt32(rounded);
 
+           
             //mapeo de una lista IReadOnlyList<Usuario> contra otra lista de UsuarioDto
             var data = _mapper.Map<IReadOnlyList<Usuario>, IReadOnlyList<UsuarioDto>>(usuarios); //este mapping debe registrarse dentro del MappingProfiles WebApi.Dtos
+
+            //added by Iqs
+            foreach (var usuarioDto in data)
+            {
+                var usuario = await _userManager.FindByIdAsync(usuarioDto.Id);
+                var roles = await _userManager.GetRolesAsync(usuario);
+                usuarioDto.Admin = roles.Contains("ADMIN") ? true : false;
+            }
+
 
             //devuelve el objeto Pagination al cliente
             return Ok(
@@ -181,7 +191,7 @@ namespace WebApi.Controllers
                     Data = data,
                     PageCount = totalPages,
                     PageIndex = usuarioParams.PageIndex,
-                    PageSize = usuarioParams.PageSize
+                    PageSize = usuarioParams.PageSize,
                 }
             );
         }
@@ -248,7 +258,7 @@ namespace WebApi.Controllers
         }
 
         [Authorize(Roles ="ADMIN")]
-        [HttpGet("account({id}")]
+        [HttpGet("account/{id}")]
         public async Task<ActionResult<UsuarioDto>> GetUsuarioById(string id)
         {
             var usuario = await _userManager.FindByIdAsync(id);
