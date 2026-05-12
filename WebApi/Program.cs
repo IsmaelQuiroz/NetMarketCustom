@@ -40,6 +40,7 @@ public class Program
                 {
                     Console.WriteLine("La base de datos está sincronizada con el modelo.");
                 }
+
                 await MarketDbContextData.CargaDataAsync(context, loggerFactory);
 
                 //Seguridad 10: Aplicar la Migración relacionada a Seguridad

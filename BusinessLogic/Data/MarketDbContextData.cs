@@ -1,4 +1,5 @@
 ﻿using Core.Entities;
+using Core.Entities.OrdenCompra;
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
@@ -62,7 +63,21 @@ namespace BusinessLogic.Data
                     await context.SaveChangesAsync();
                 }
 
-            }catch (Exception e) { 
+                if (!context.TipoEnvios.Any())
+                {
+                    var tipoEnvioData = File.ReadAllText("../BusinessLogic/CargarData/tipoenvio.json");
+                    var tipoenvios = JsonSerializer.Deserialize<List<TipoEnvio>>(tipoEnvioData);
+                    foreach (var tipoenvio in tipoenvios)
+                    {
+                        context.TipoEnvios.Add(tipoenvio);
+                    }
+                    await context.SaveChangesAsync();
+                }
+
+
+
+            }
+            catch (Exception e) { 
                 var logger = loggerFactory.CreateLogger<MarketDbContextData>();
                 logger.LogError(e.Message);
             }

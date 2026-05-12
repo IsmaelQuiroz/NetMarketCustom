@@ -38,6 +38,8 @@ public class Startup
         //Token #
         services.AddScoped<ITokenService, TokenService>();
 
+        services.AddScoped<IOrdenCompraService, OrdenCompraService>();
+
         /*Seguridad: 8 Inyectar el Servicio de IdentityCore al interior de nuestro proyecto WebApi,
         para que se ejecute el proceso de Migration o CodeFirst ya para la creación de las tablas en SQL
         este objeto es la instancia del EntityCore , la representación del modelo */
@@ -69,7 +71,7 @@ public class Startup
         services.AddAutoMapper(typeof(MappingProfiles));
 
         services.AddScoped(typeof(IGenericRepository<>), (typeof(GenericRepository<>)));
-        services.AddScoped(typeof(IGenericSeguridadRepository<>), (typeof(GenericSeguridadRepository<>))); //Generic Repository Pattern 5
+        services.AddScoped(typeof(IGenericSeguridadRepository<>), (typeof(GenericSeguridadRepository<>))); //Generic Repository Pattern 5 
 
         //services.AddDbContext<MarketDbContext>();
         services.AddDbContext<MarketDbContext>(opt => {

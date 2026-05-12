@@ -36,7 +36,7 @@ namespace BusinessLogic.Logic
         //los parametros condiciones y relaciones entre entidades vienen desde el objeto spec
         public async Task<T> GetByIdWithSpec(ISpecification<T> spec)
         {
-            //en la implementacion del spec, va pasar hacia el AppluSpecification 
+            //en la implementacion del spec, va pasar hacia el ApplySpecification 
             //e implementará toda la lógica para retornar un solo valor
             return await ApplySpecification(spec).FirstOrDefaultAsync();
         }

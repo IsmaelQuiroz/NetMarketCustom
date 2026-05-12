@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using Core.Entities;
-
 namespace WebApi.Dtos
 {
     public class MappingProfiles : Profile //esta clase Profile proviene desde la libreria instalada Automaper
@@ -16,6 +15,7 @@ namespace WebApi.Dtos
 
             CreateMap<Direccion, DireccionDto>().ReverseMap();
             CreateMap<Usuario, UsuarioDto>();
+            CreateMap<DireccionDto, Core.Entities.OrdenCompra.Direccion>();
         }
     }
 }

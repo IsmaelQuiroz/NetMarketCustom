@@ -48,6 +48,7 @@ namespace WebApi.Controllers
         [HttpPost("login")]
         public async Task<ActionResult<UsuarioDto>> Login(LoginDto loginDto)
         {
+            
             var usuario = await _userManager.FindByEmailAsync(loginDto.Email);
 
             if (User == null)

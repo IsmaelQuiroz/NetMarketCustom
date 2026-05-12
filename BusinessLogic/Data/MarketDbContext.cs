@@ -1,4 +1,6 @@
 ﻿using Core.Entities;
+using Core.Entities.OrdenCompra;
+//using Core.Entities.OrdenCompras;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using System;
@@ -20,6 +22,10 @@ namespace BusinessLogic.Data
         public DbSet<CategoriaProducto> CategoriaProducto { get; set; }
         public DbSet<Producto> Producto {  get; set; }  
         public DbSet<Marca> Marca { get; set; }
+
+        public DbSet<OrdenCompras> OrdenCompras { get; set;}
+        public DbSet<OrdenItem> OrdenItems {  get; set; }
+        public DbSet<TipoEnvio> TipoEnvios { get; set; }
 
         //para Aplicar las configuraciones de BusinessLogic.Data.Configuration para cada propiedad de las Entities
         protected override void OnModelCreating(ModelBuilder modelBuilder)
